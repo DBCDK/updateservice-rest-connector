@@ -42,6 +42,10 @@
         <slf4j.version>1.7.25</slf4j.version>
         <stopwatch.version>1.0-SNAPSHOT</stopwatch.version>
         <wiremock.version>2.18.0</wiremock.version>
+        <jaxws.maven.plugin>2.3</jaxws.maven.plugin>
+        <webservices.api.version>2.0</webservices.api.version>
+        <maven.jaxb2.common.plugin>0.9.0</maven.jaxb2.common.plugin>
+        <buildnumber.maven.plugin.version>1.4</buildnumber.maven.plugin.version>
     </properties>
 
     <dependencies>
@@ -141,9 +145,25 @@
             <version>${slf4j.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>jaxb2-basics</artifactId>
+            <version>${maven.jaxb2.common.plugin}</version>
+        </dependency>
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <targetPath>META-INF/wsdl/update</targetPath>
+                <directory>src/wsdl</directory>
+                <includes>
+                    <include>catalogingUpdate.wsdl</include>
+                    <include>catalogingUpdate.xsd</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -158,6 +178,84 @@
                     <showWarnings>true</showWarnings>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${endorsed.dir}</outputDirectory>
+                            <silent>true</silent>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>javax</groupId>
+                                    <artifactId>javaee-endorsed-api</artifactId>
+                                    <version>7.0</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jvnet.jax-ws-commons</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <version>${jaxws.maven.plugin}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                        <configuration>
+                            <wsdlFiles>
+                                <wsdlFile>catalogingUpdate.wsdl</wsdlFile>
+                            </wsdlFiles>
+                            <wsdlLocation>META-INF/wsdl/update/catalogingUpdate.wsdl</wsdlLocation>
+                            <wsdlDirectory>${basedir}/src/wsdl</wsdlDirectory>
+                            <packageName>dk.dbc.updateservice.service.api</packageName>
+                            <staleFile>${project.build.directory}/jaxws/stale/catalogingUpdate.stale</staleFile>
+                        </configuration>
+                        <id>wsimport-generate-catalogingUpdate-internal</id>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>javax.xml</groupId>
+                        <artifactId>webservices-api</artifactId>
+                        <version>${webservices.api.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.jvnet.jaxb2_commons</groupId>
+                        <artifactId>jaxb2-basics</artifactId>
+                        <version>${maven.jaxb2.common.plugin}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <xjcArgs>
+                        <xjcArg>-XtoString</xjcArg>
+                        <xjcArg>-Xequals</xjcArg>
+                        <xjcArg>-XhashCode</xjcArg>
+                    </xjcArgs>
+                    <sourceDestDir>${project.build.directory}/generated-sources/jaxws-wsimport</sourceDestDir>
+                    <xnocompile>true</xnocompile>
+                    <verbose>true</verbose>
+                    <extension>true</extension>
+                    <catalog>${basedir}/src/jax-ws-catalog.xml</catalog>
+                    <target>2.0</target>
+                    <vmArgs>
+                        <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
+                    </vmArgs>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
