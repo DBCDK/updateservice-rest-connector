@@ -18,5 +18,8 @@ You must have the following environment variables in your deployment:
     UPDATE_SERVICE_URL
 
 ### Examples
-    TODO
-
+    BibliographicRecord bibliographicRecord // ... fill out data
+    UpdateRecordResult result = doubleRecordCheckConnector.doubleRecordCheck(bibliographicRecord);
+    if (result.getUpdateStatus() != UpdateStatusEnum.OK) {
+        // Handler double record situation
+    } 
