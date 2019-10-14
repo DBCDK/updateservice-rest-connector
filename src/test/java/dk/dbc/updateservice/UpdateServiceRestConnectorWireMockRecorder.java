@@ -29,6 +29,7 @@ public class UpdateServiceRestConnectorWireMockRecorder {
     private static void doubleRecordCheckRequests(UpdateServiceDoubleRecordCheckConnectorTest connectorTest)
             throws Exception {
         connectorTest.checkDoubleRecordTest_Ok();
+        connectorTest.checkDoubleRecordTest_DoubleRecord();
     }
 
 }

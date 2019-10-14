@@ -1,0 +1,21 @@
+{
+  "id" : "540a9e22-41b7-38f9-bfb3-16f5beb8c6fb",
+  "request" : {
+    "url" : "/api/v1/doublerecordcheck",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToXml" : "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><bibliographicRecord xmlns=\"http://oss.dbc.dk/ns/catalogingUpdate\"><recordSchema>info:lc/xmlns/marcxchange-v1&lt;/recordSchema</recordSchema><recordPacking>xml</recordPacking><recordData><record xmlns=\"info:lc/xmlns/marcxchange-v1\">            <datafield ind1=\"0\" ind2=\"0\" tag=\"001\">                <subfield code=\"a\">52958858</subfield>                <subfield code=\"b\">870970</subfield>                <subfield code=\"c\">20170616143600</subfield>                <subfield code=\"d\">20180628</subfield>                <subfield code=\"f\">a</subfield>            </datafield>            <datafield ind1=\"0\" ind2=\"0\" tag=\"021\">                <subfield code=\"e\">9782843090387</subfield>            </datafield>        </record></recordData></bibliographicRecord>"
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-api-v1-doublerecordcheck-XUDK2.xml",
+    "headers" : {
+      "Server" : "Payara Server  5.191.2 #badassfish",
+      "X-Powered-By" : "Servlet/4.0 JSP/2.3 (Payara Server  5.191.2 #badassfish Java/Oracle Corporation/1.8)",
+      "Content-Type" : "application/xml",
+      "X-Frame-Options" : "SAMEORIGIN"
+    }
+  },
+  "uuid" : "540a9e22-41b7-38f9-bfb3-16f5beb8c6fb"
+}
