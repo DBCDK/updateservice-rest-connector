@@ -7,12 +7,12 @@ package dk.dbc.updateservice;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import dk.dbc.httpclient.HttpClient;
-import dk.dbc.updateservice.service.api.BibliographicRecord;
-import dk.dbc.updateservice.service.api.DoubleRecordEntries;
-import dk.dbc.updateservice.service.api.DoubleRecordEntry;
-import dk.dbc.updateservice.service.api.RecordData;
-import dk.dbc.updateservice.service.api.UpdateRecordResult;
-import dk.dbc.updateservice.service.api.UpdateStatusEnum;
+import dk.dbc.oss.ns.catalogingupdate.BibliographicRecord;
+import dk.dbc.oss.ns.catalogingupdate.DoubleRecordEntries;
+import dk.dbc.oss.ns.catalogingupdate.DoubleRecordEntry;
+import dk.dbc.oss.ns.catalogingupdate.RecordData;
+import dk.dbc.oss.ns.catalogingupdate.UpdateRecordResult;
+import dk.dbc.oss.ns.catalogingupdate.UpdateStatusEnum;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.junit.jupiter.api.AfterAll;

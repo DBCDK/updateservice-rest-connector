@@ -219,8 +219,6 @@
                             </wsdlFiles>
                             <wsdlLocation>META-INF/wsdl/update/catalogingUpdate.wsdl</wsdlLocation>
                             <wsdlDirectory>${basedir}/src/wsdl</wsdlDirectory>
-                            <packageName>dk.dbc.updateservice.service.api</packageName>
-                            <staleFile>${project.build.directory}/jaxws/stale/catalogingUpdate.stale</staleFile>
                         </configuration>
                         <id>wsimport-generate-catalogingUpdate-internal</id>
                         <phase>generate-sources</phase>
