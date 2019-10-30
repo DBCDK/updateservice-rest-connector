@@ -20,7 +20,7 @@ pipeline {
 		stage("verify") {
 			steps {
 				withMaven(maven: 'Maven 3') {
-					sh "mvn verify pmd:pmd javadoc:aggregate"
+					sh "mvn verify pmd:pmd findbugs:findbugs"
 					junit "target/surefire-reports/TEST-*.xml"
 				}
 			}
