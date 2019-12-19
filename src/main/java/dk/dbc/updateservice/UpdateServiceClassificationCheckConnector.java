@@ -39,7 +39,7 @@ public class UpdateServiceClassificationCheckConnector {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateServiceClassificationCheckConnector.class);
-    private static final String PATH_DOUBLE_RECORD_CHECK = "/api/v1/classificationcheck";
+    private static final String PATH_CLASSIFICATION_CHECK = "/api/v1/classificationcheck";
 
     private static final RetryPolicy RETRY_POLICY = new RetryPolicy()
             .retryOn(Collections.singletonList(ProcessingException.class))
@@ -116,10 +116,10 @@ public class UpdateServiceClassificationCheckConnector {
         }
     }
 
-    public UpdateRecordResult doubleRecordCheck(BibliographicRecord bibliographicRecord) throws UpdateServiceClassificationCheckConnectorException {
+    public UpdateRecordResult classificationCheck(BibliographicRecord bibliographicRecord) throws UpdateServiceClassificationCheckConnectorException {
         final Stopwatch stopwatch = new Stopwatch();
         try {
-            final InputStream inputStream = sendPostRequest(PATH_DOUBLE_RECORD_CHECK, bibliographicRecord, InputStream.class);
+            final InputStream inputStream = sendPostRequest(PATH_CLASSIFICATION_CHECK, bibliographicRecord, InputStream.class);
             return JAXB.unmarshal(inputStream, UpdateRecordResult.class);
         } finally {
             logger.log("classificationcheck took {} milliseconds",
