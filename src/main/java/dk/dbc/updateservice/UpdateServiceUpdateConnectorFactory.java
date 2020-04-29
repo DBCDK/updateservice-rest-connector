@@ -41,7 +41,7 @@ public class UpdateServiceUpdateConnectorFactory {
     private String updateServiceUrl;
 
     @Inject
-    @ConfigProperty(name = "UPDATE_SERVICE_DOUBLE_RECORD_CHECK_TIMING_LOG_LEVEL", defaultValue = "INFO")
+    @ConfigProperty(name = "UPDATE_SERVICE_TIMING_LOG_LEVEL", defaultValue = "INFO")
     private UpdateServiceUpdateConnector.TimingLogLevel level;
 
     UpdateServiceUpdateConnector updateServiceUpdateConnector;

@@ -115,7 +115,7 @@ public class UpdateServiceUpdateConnector {
             final InputStream responseStream = sendPostRequest(PATH_UPDATESERVICE, updateServiceRequestDTO, InputStream.class);
             return jsonbContext.unmarshall(StringUtil.asString(responseStream), UpdateRecordResponseDTO.class);
         } finally {
-            logger.log("doubleRecordCheck took {} milliseconds",
+            logger.log("updateRecord took {} milliseconds",
                     stopwatch.getElapsedTime(TimeUnit.MILLISECONDS));
         }
     }
