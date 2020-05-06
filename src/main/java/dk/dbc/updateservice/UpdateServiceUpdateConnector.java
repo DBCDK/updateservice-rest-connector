@@ -11,6 +11,8 @@ import dk.dbc.httpclient.PathBuilder;
 import dk.dbc.invariant.InvariantUtil;
 import dk.dbc.jsonb.JSONBContext;
 import dk.dbc.jsonb.JSONBException;
+import dk.dbc.updateservice.dto.SchemasRequestDTO;
+import dk.dbc.updateservice.dto.SchemasResponseDTO;
 import dk.dbc.updateservice.dto.UpdateRecordResponseDTO;
 import dk.dbc.updateservice.dto.UpdateServiceRequestDTO;
 import dk.dbc.util.Stopwatch;
@@ -33,6 +35,7 @@ public class UpdateServiceUpdateConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateServiceUpdateConnector.class);
     private static final String PATH_UPDATESERVICE = "/api/v1/updateservice";
+    private static final String PATH_GETSCHEMAS = "/api/v1/updateservice/getschemas";
 
     private static final RetryPolicy RETRY_POLICY = new RetryPolicy()
             .retryOn(Collections.singletonList(ProcessingException.class))
@@ -120,13 +123,23 @@ public class UpdateServiceUpdateConnector {
         }
     }
 
-    private <T> T sendPostRequest(String basePath, UpdateServiceRequestDTO updateServiceRequestDTO, Class<T> type)
+    public SchemasResponseDTO getSchemas(SchemasRequestDTO schemasRequestDTO) throws UpdateServiceUpdateConnectorException, JSONBException {
+        final Stopwatch stopwatch = new Stopwatch();
+        try {
+            final InputStream responseStream = sendPostRequest(PATH_GETSCHEMAS, schemasRequestDTO, InputStream.class);
+            return jsonbContext.unmarshall(StringUtil.asString(responseStream), SchemasResponseDTO.class);
+        } finally {
+            logger.log("getSchemas took {} millisecponds", stopwatch.getElapsedTime(TimeUnit.MILLISECONDS));
+        }
+
+    }
+    private <T> T sendPostRequest(String basePath, Object request, Class<T> type)
             throws UpdateServiceUpdateConnectorException, JSONBException {
-        InvariantUtil.checkNotNullOrThrow(updateServiceRequestDTO, "updateServiceRequestDTO");
+        InvariantUtil.checkNotNullOrThrow(request, "request");
         final PathBuilder path = new PathBuilder(basePath);
         final HttpPost post = new HttpPost(failSafeHttpClient)
                 .withBaseUrl(baseUrl)
-                .withData(jsonbContext.marshall(updateServiceRequestDTO), "application/json")
+                .withData(jsonbContext.marshall(request), "application/json")
                 .withHeader("Accept", "application/json")
                 .withPathElements(path.build());
 

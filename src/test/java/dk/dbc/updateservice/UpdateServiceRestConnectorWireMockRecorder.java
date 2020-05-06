@@ -50,8 +50,8 @@ public class UpdateServiceRestConnectorWireMockRecorder {
     }
 
     private static void updateRestRequests(UpdateServiceUpdateConnectorTest connectorTest) throws JSONBException, UpdateServiceUpdateConnectorException {
-        connectorTest.checkThatConnectorWorksWithDTOS();
+        connectorTest.checkThatUpdateRecordWorksWithDTOS();
         connectorTest.checkThatConnectorReturnsProperAuthFailure();
+        connectorTest.checkThatGetSchemasWorksWithDTOS();
     }
-
 }

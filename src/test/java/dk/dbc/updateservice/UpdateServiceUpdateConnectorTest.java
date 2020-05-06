@@ -7,6 +7,9 @@ import dk.dbc.updateservice.dto.AuthenticationDTO;
 import dk.dbc.updateservice.dto.BibliographicRecordDTO;
 import dk.dbc.updateservice.dto.MessageEntryDTO;
 import dk.dbc.updateservice.dto.RecordDataDTO;
+import dk.dbc.updateservice.dto.SchemaDTO;
+import dk.dbc.updateservice.dto.SchemasRequestDTO;
+import dk.dbc.updateservice.dto.SchemasResponseDTO;
 import dk.dbc.updateservice.dto.TypeEnumDTO;
 import dk.dbc.updateservice.dto.UpdateRecordResponseDTO;
 import dk.dbc.updateservice.dto.UpdateServiceRequestDTO;
@@ -51,7 +54,7 @@ public class UpdateServiceUpdateConnectorTest {
     static void stopWiremockServer() { wireMockServer.stop(); }
 
     @Test
-    void checkThatConnectorWorksWithDTOS() throws JSONBException, UpdateServiceUpdateConnectorException {
+    void checkThatUpdateRecordWorksWithDTOS() throws JSONBException, UpdateServiceUpdateConnectorException {
         final UpdateServiceRequestDTO  updateServiceRequestDTO = getExampleRequest();
 
         final UpdateRecordResponseDTO expectedResponse = new UpdateRecordResponseDTO();
@@ -60,6 +63,17 @@ public class UpdateServiceUpdateConnectorTest {
         UpdateRecordResponseDTO actualRespons = connector.updateRecord(updateServiceRequestDTO);
 
         assertThat("Update returns OK", actualRespons, is(expectedResponse));
+    }
+
+    @Test
+    void checkThatGetSchemasWorksWithDTOS() throws JSONBException, UpdateServiceUpdateConnectorException {
+        final SchemasRequestDTO schemasRequestDTO = getExampleRequestForSchemas();
+
+        final SchemasResponseDTO expectedResponse = getExampleReponseForSchemas();
+
+        SchemasResponseDTO actualResponse = connector.getSchemas(schemasRequestDTO);
+
+        assertThat("Update (getschemas) returns OK", actualResponse, is(expectedResponse));
     }
 
     @Test
@@ -159,5 +173,58 @@ public class UpdateServiceUpdateConnectorTest {
         bibliographicRecordDTO.setRecordDataDTO(recordDataDTO);
         updateServiceRequestDTO.setBibliographicRecordDTO(bibliographicRecordDTO);
         return updateServiceRequestDTO;
+    }
+
+    private SchemasRequestDTO getExampleRequestForSchemas() {
+        SchemasRequestDTO schemasRequestDTO = new SchemasRequestDTO();
+        AuthenticationDTO authenticationDTO = new AuthenticationDTO();
+        authenticationDTO.setGroupId("010100");
+        authenticationDTO.setUserId("");
+        authenticationDTO.setPassword("");
+        schemasRequestDTO.setAuthenticationDTO(authenticationDTO);
+        schemasRequestDTO.setTrackingId("update-warmup");
+        return schemasRequestDTO;
+    }
+
+    private SchemasResponseDTO getExampleReponseForSchemas() {
+        SchemasResponseDTO schemasResponseDTO = new SchemasResponseDTO();
+        schemasResponseDTO.setUpdateStatusEnumDTO(UpdateStatusEnumDTO.OK);
+        List<SchemaDTO> schemaDTOs = Arrays.asList(
+                getSchemaDTO("Skabelon til periodicaposter fra ffu-biblioteker.","ffuperiodica"),
+                getSchemaDTO("","dbcsingle"),
+                getSchemaDTO("", "dbcartanm"),
+                getSchemaDTO("Skabelon til optrettelse af ffu-singlepost - alle materialetyper.","ffuhoved"),
+                getSchemaDTO("Skabelon til emneordsposter, submitter: 190004", "dbcemneord"),
+                getSchemaDTO("", "allowall"),
+                getSchemaDTO("Skabelon til optrettelse af ffu-artikelpost (periodicaartikel og artikel i bog", "ffuartikel"),
+                getSchemaDTO("", "invalid"),
+                getSchemaDTO("Skabelon til autoritetsposter (libv3-base 870979)", "dbcautoritet"),
+                getSchemaDTO("", "dbclittolk"),
+                getSchemaDTO("Skabelon til katalogisering af flerbindsværk af fysiske bøger - bindpost.", "BCIbogbind"),
+                getSchemaDTO("Skabelon til optrettelse af ffu-singlepost - alle materialetyper.", "ffu"),
+                getSchemaDTO("", "dbchoved"),
+                getSchemaDTO("", "dbcperiodica"),
+                getSchemaDTO("Skabelon til materialevurderingsposter, submitter: 870976", "dbcmatvurd"),
+                getSchemaDTO("Skabelon til katalogisering af fysiske bøger - enkeltstående post.", "BCIbog"),
+                getSchemaDTO("Skabelon til sletteposter - alle post- og materialetyper.", "delete"),
+                getSchemaDTO("Skabelon til optrettelse af ffu-sektionspost - alle materialetyper.", "ffusektion"),
+                getSchemaDTO("Skabelon til indsendelse af metakompasdata til læsekompasset.", "metakompas"),
+                getSchemaDTO("Skabelon til optrettelse af ffu-singlepost - alle materialetyper.", "ffumusik"),
+                getSchemaDTO("", "dbcsektion"),
+                getSchemaDTO("", "dbc"),
+                getSchemaDTO("Skabelon til optrettelse af ffu-bindpost - alle materialetyper.", "ffubind"),
+                getSchemaDTO("Skabelon til katalogisering af flerbindsværk af fysiske bøger - hovedpost.", "BCIboghoved"),
+                getSchemaDTO("", "dbcbind")
+
+        );
+        schemasResponseDTO.setSchemaDTOList(schemaDTOs);
+        return schemasResponseDTO;
+    }
+
+    private SchemaDTO getSchemaDTO(String schemaInfo, String schemaName) {
+        SchemaDTO schemaDTO = new  SchemaDTO();
+        schemaDTO.setSchemaInfo(schemaInfo);
+        schemaDTO.setSchemaName(schemaName);
+        return schemaDTO;
     }
 }
