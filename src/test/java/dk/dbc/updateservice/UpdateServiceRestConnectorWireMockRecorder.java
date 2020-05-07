@@ -5,6 +5,8 @@
 
 package dk.dbc.updateservice;
 
+import dk.dbc.jsonb.JSONBException;
+
 public class UpdateServiceRestConnectorWireMockRecorder {
 
         /*
@@ -27,8 +29,13 @@ public class UpdateServiceRestConnectorWireMockRecorder {
                 UpdateServiceClassificationCheckConnectorTest.CLIENT, "http://localhost:8080");
         final UpdateServiceClassificationCheckConnectorTest updateServiceClassificationCheckConnectorTest = new UpdateServiceClassificationCheckConnectorTest();
 
+        UpdateServiceUpdateConnectorTest.connector = new UpdateServiceUpdateConnector(
+                UpdateServiceUpdateConnectorTest.CLIENT, "http://localhost:8080");
+        final UpdateServiceUpdateConnectorTest updateServiceUpdateConnectorTest = new UpdateServiceUpdateConnectorTest();
+
         doubleRecordCheckRequests(updateServiceDoubleRecordCheckConnectorTest);
         classificationCheckRequests(updateServiceClassificationCheckConnectorTest);
+        updateRestRequests(updateServiceUpdateConnectorTest);
     }
 
     private static void doubleRecordCheckRequests(UpdateServiceDoubleRecordCheckConnectorTest connectorTest)
@@ -42,4 +49,9 @@ public class UpdateServiceRestConnectorWireMockRecorder {
         connectorTest.classificationCheckTest_NoClassificationChange();
     }
 
+    private static void updateRestRequests(UpdateServiceUpdateConnectorTest connectorTest) throws JSONBException, UpdateServiceUpdateConnectorException {
+        connectorTest.checkThatUpdateRecordWorksWithDTOS();
+        connectorTest.checkThatConnectorReturnsProperAuthFailure();
+        connectorTest.checkThatGetSchemasWorksWithDTOS();
+    }
 }

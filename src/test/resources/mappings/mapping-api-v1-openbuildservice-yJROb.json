@@ -1,0 +1,23 @@
+{
+  "id" : "fb86cd0f-4812-3b1e-b911-1a9a1628348a",
+  "request" : {
+    "url" : "/api/v1/openbuildservice",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{  \"schemaName\": \"ffu\",  \"bibliographicRecordDTO\": {    \"recordSchema\": \"info:lc/xmlns/marcxchange-v1\",    \"recordPacking\": \"xml\",    \"recordDataDTO\": {      \"content\": []    },    \"extraRecordDataDTO\": {      \"content\": []    }  },  \"trackingId\": \"atm-manual\"}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-api-v1-openbuildservice-yJROb.json",
+    "headers" : {
+      "Server" : "Payara Server Enterprise  5.201 #badassfish",
+      "X-Powered-By" : "Servlet/4.0 JSP/2.3 (Payara Server Enterprise  5.201 #badassfish Java/Azul Systems, Inc./1.8)",
+      "Content-Type" : "application/json",
+      "X-Frame-Options" : "SAMEORIGIN"
+    }
+  },
+  "uuid" : "fb86cd0f-4812-3b1e-b911-1a9a1628348a"
+}
