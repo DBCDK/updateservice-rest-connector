@@ -32,7 +32,7 @@ public class UpdateServiceBuildConnectorFactory {
     }
 
     @Inject
-    @ConfigProperty(name = "BUILD_SERVICE_URL")
+    @ConfigProperty(name = "BUILD_SERVICE_URL", defaultValue = "<buildservice url ikke sat>")
     private String buildServiceUrl;
 
     @Inject
