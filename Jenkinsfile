@@ -21,7 +21,7 @@ pipeline {
 			steps {
 				withMaven(maven: 'Maven 3') {
 					sh "mvn verify pmd:pmd findbugs:findbugs"
-					junit "target/surefire-reports/TEST-*.xml"
+					junit "**/target/surefire-reports/TEST-*.xml"
 				}
 			}
 		}
