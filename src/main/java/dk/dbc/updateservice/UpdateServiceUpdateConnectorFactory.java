@@ -6,17 +6,18 @@
 package dk.dbc.updateservice;
 
 import dk.dbc.httpclient.HttpClient;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class UpdateServiceUpdateConnectorFactory {
