@@ -17,18 +17,21 @@ import dk.dbc.updateservice.dto.UpdateRecordResponseDTO;
 import dk.dbc.updateservice.dto.UpdateServiceRequestDTO;
 import dk.dbc.util.Stopwatch;
 import dk.dbc.dataio.commons.utils.lang.StringUtil;
+
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
+
 import net.jodah.failsafe.RetryPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class UpdateServiceUpdateConnector {
     JSONBContext jsonbContext = new JSONBContext();
+
     public enum TimingLogLevel {
         TRACE, DEBUG, INFO, WARN, ERROR
     }
@@ -113,9 +116,13 @@ public class UpdateServiceUpdateConnector {
     }
 
     public UpdateRecordResponseDTO updateRecord(UpdateServiceRequestDTO updateServiceRequestDTO) throws UpdateServiceUpdateConnectorException, JSONBException {
+        return updateRecord(updateServiceRequestDTO, null);
+    }
+
+    public UpdateRecordResponseDTO updateRecord(UpdateServiceRequestDTO updateServiceRequestDTO, String xForwardedFor) throws UpdateServiceUpdateConnectorException, JSONBException {
         final Stopwatch stopwatch = new Stopwatch();
         try {
-            final InputStream responseStream = sendPostRequest(PATH_UPDATESERVICE, updateServiceRequestDTO, InputStream.class);
+            final InputStream responseStream = sendPostRequest(PATH_UPDATESERVICE, updateServiceRequestDTO, xForwardedFor, InputStream.class);
             return jsonbContext.unmarshall(StringUtil.asString(responseStream), UpdateRecordResponseDTO.class);
         } finally {
             logger.log("updateRecord took {} milliseconds",
@@ -126,14 +133,14 @@ public class UpdateServiceUpdateConnector {
     public SchemasResponseDTO getSchemas(SchemasRequestDTO schemasRequestDTO) throws UpdateServiceUpdateConnectorException, JSONBException {
         final Stopwatch stopwatch = new Stopwatch();
         try {
-            final InputStream responseStream = sendPostRequest(PATH_GETSCHEMAS, schemasRequestDTO, InputStream.class);
+            final InputStream responseStream = sendPostRequest(PATH_GETSCHEMAS, schemasRequestDTO, null, InputStream.class);
             return jsonbContext.unmarshall(StringUtil.asString(responseStream), SchemasResponseDTO.class);
         } finally {
-            logger.log("getSchemas took {} millisecponds", stopwatch.getElapsedTime(TimeUnit.MILLISECONDS));
+            logger.log("getSchemas took {} milliseconds", stopwatch.getElapsedTime(TimeUnit.MILLISECONDS));
         }
-
     }
-    private <T> T sendPostRequest(String basePath, Object request, Class<T> type)
+
+    private <T> T sendPostRequest(String basePath, Object request, String xForwardedFor, Class<T> type)
             throws UpdateServiceUpdateConnectorException, JSONBException {
         InvariantUtil.checkNotNullOrThrow(request, "request");
         final PathBuilder path = new PathBuilder(basePath);
@@ -142,6 +149,10 @@ public class UpdateServiceUpdateConnector {
                 .withData(jsonbContext.marshall(request), "application/json")
                 .withHeader("Accept", "application/json")
                 .withPathElements(path.build());
+
+        if (xForwardedFor != null) {
+            post.withHeader("X-Forwarded-For", xForwardedFor);
+        }
 
         final Response response = post.execute();
         assertResponseStatus(response, Response.Status.OK);
@@ -167,7 +178,7 @@ public class UpdateServiceUpdateConnector {
             throw new UpdateServiceUpdateConnectorException(
                     String.format("Update returned with '%s' status code: %s",
                             actualStatus,
-                    actualStatus.getStatusCode()));
+                            actualStatus.getStatusCode()));
         }
     }
 

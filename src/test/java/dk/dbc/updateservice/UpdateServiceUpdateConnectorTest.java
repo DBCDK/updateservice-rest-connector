@@ -66,6 +66,22 @@ public class UpdateServiceUpdateConnectorTest {
     }
 
     @Test
+    void checkThatUpdateRecordWorksWithDTOS_WithXForwardedFor() throws JSONBException, UpdateServiceUpdateConnectorException {
+        final UpdateServiceRequestDTO  updateServiceRequestDTO = getExampleRequest();
+
+        final UpdateRecordResponseDTO expectedResponse = new UpdateRecordResponseDTO();
+        expectedResponse.setUpdateStatusEnumDTO(UpdateStatusEnumDTO.FAILED);
+        final MessageEntryDTO messageEntryDTO = new MessageEntryDTO();
+        messageEntryDTO.setMessage("Authentication error");
+        messageEntryDTO.setType(TypeEnumDTO.FATAL);
+        expectedResponse.addMessageEntryDtos(Arrays.asList(messageEntryDTO));
+
+        final UpdateRecordResponseDTO actualRespons = connector.updateRecord(updateServiceRequestDTO, "42.42.42.42");
+
+        assertThat("Update returns authentication error", actualRespons, is(expectedResponse));
+    }
+
+    @Test
     void checkThatGetSchemasWorksWithDTOS() throws JSONBException, UpdateServiceUpdateConnectorException {
         final SchemasRequestDTO schemasRequestDTO = getExampleRequestForSchemas();
 
