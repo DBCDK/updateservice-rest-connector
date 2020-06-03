@@ -2,13 +2,13 @@ package dk.dbc.updateservice;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import dk.dbc.httpclient.HttpClient;
-import dk.dbc.oss.ns.catalogingupdate.BibliographicRecord;
-import dk.dbc.oss.ns.catalogingupdate.MessageEntry;
-import dk.dbc.oss.ns.catalogingupdate.Messages;
-import dk.dbc.oss.ns.catalogingupdate.RecordData;
-import dk.dbc.oss.ns.catalogingupdate.Type;
-import dk.dbc.oss.ns.catalogingupdate.UpdateRecordResult;
-import dk.dbc.oss.ns.catalogingupdate.UpdateStatusEnum;
+import dk.dbc.updateservice.dto.BibliographicRecordDTO;
+import dk.dbc.updateservice.dto.MessageEntryDTO;
+import dk.dbc.updateservice.dto.RecordDataDTO;
+import dk.dbc.updateservice.dto.TypeEnumDTO;
+import dk.dbc.updateservice.dto.UpdateRecordResponseDTO;
+import dk.dbc.updateservice.dto.UpdateStatusEnumDTO;
+import java.util.Arrays;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.junit.jupiter.api.AfterAll;
@@ -77,11 +77,10 @@ public class UpdateServiceClassificationCheckConnectorTest {
 
     @Test
     void classificationCheckTest_NoClassificationChange() throws Exception {
-        BibliographicRecord bibliographicRecord = new BibliographicRecord();
-        bibliographicRecord.setRecordSchema("info:lc/xmlns/marcxchange-v1</recordSchema");
-        bibliographicRecord.setRecordPacking("xml");
-
-        String recordString = "<record xmlns=\"info:lc/xmlns/marcxchange-v1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"info:lc/xmlns/marcxchange-v1 http://www.loc.gov/standards/iso25577/marcxchange-1-1.xsd\">\n" +
+        BibliographicRecordDTO bibliographicRecordDTO = new BibliographicRecordDTO();
+        bibliographicRecordDTO.setRecordSchema("info:lc/xmlns/marcxchange-v1");
+        bibliographicRecordDTO.setRecordPacking("xml");
+        String record = "<record xmlns=\"info:lc/xmlns/marcxchange-v1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"info:lc/xmlns/marcxchange-v1 http://www.loc.gov/standards/iso25577/marcxchange-1-1.xsd\">\n" +
                 "            <leader>00000n    2200000   4500</leader>\n" +
                 "            <datafield ind1=\"0\" ind2=\"0\" tag=\"001\">\n" +
                 "                <subfield code=\"a\">50938409</subfield>\n" +
@@ -227,25 +226,24 @@ public class UpdateServiceClassificationCheckConnectorTest {
                 "            </datafield>\n" +
                 "        </record>";
 
-        RecordData recordData = new RecordData();
-        Document document = byteArrayToDocument(recordString.getBytes());
-        recordData.getContent().add(document.getDocumentElement());
-        bibliographicRecord.setRecordData(recordData);
+        List<Object> content = Arrays.asList(byteArrayToDocument(record.getBytes()));
 
-        UpdateRecordResult actual = connector.classificationCheck(bibliographicRecord);
-        UpdateRecordResult expected = new UpdateRecordResult();
-        expected.setUpdateStatus(UpdateStatusEnum.OK);
-
+        RecordDataDTO recordDataDTO = new RecordDataDTO();
+        recordDataDTO.setContent(content);
+        bibliographicRecordDTO.setRecordDataDTO(recordDataDTO);
+        UpdateRecordResponseDTO actual = connector.classificationCheck(bibliographicRecordDTO);
+        UpdateRecordResponseDTO expected = new UpdateRecordResponseDTO();
+        expected.setUpdateStatusEnumDTO(UpdateStatusEnumDTO.OK);
         assertThat("Classification check returns OK if there is no classification change", actual, is(expected));
     }
 
     @Test
     void classificationCheckTest_ClassificationChange() throws Exception {
-        BibliographicRecord bibliographicRecord = new BibliographicRecord();
-        bibliographicRecord.setRecordSchema("info:lc/xmlns/marcxchange-v1</recordSchema");
-        bibliographicRecord.setRecordPacking("xml");
+        BibliographicRecordDTO bibliographicRecordDTO = new BibliographicRecordDTO();
+        bibliographicRecordDTO.setRecordSchema("info:lc/xmlns/marcxchange-v1");
+        bibliographicRecordDTO.setRecordPacking("xml");
 
-        String recordString = "<record xmlns=\"info:lc/xmlns/marcxchange-v1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"info:lc/xmlns/marcxchange-v1 http://www.loc.gov/standards/iso25577/marcxchange-1-1.xsd\">\n" +
+        String record = "<record xmlns=\"info:lc/xmlns/marcxchange-v1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"info:lc/xmlns/marcxchange-v1 http://www.loc.gov/standards/iso25577/marcxchange-1-1.xsd\">\n" +
                 "            <leader>00000n    2200000   4500</leader>\n" +
                 "            <datafield ind1=\"0\" ind2=\"0\" tag=\"001\">\n" +
                 "                <subfield code=\"a\">50938409</subfield>\n" +
@@ -301,7 +299,7 @@ public class UpdateServiceClassificationCheckConnectorTest {
                 "                <subfield code=\"a\">Odd er et egg</subfield>\n" +
                 "            </datafield>\n" +
                 "            <datafield ind1=\"0\" ind2=\"0\" tag=\"245\">\n" +
-                "                <subfield code=\"a\">Ib er en agurk</subfield>\n" +
+                "                <subfield code=\"a\">Ib er et æggehoved</subfield>\n" +
                 "            </datafield>\n" +
                 "            <datafield ind1=\"0\" ind2=\"0\" tag=\"250\">\n" +
                 "                <subfield code=\"a\">1. udgave</subfield>\n" +
@@ -391,32 +389,29 @@ public class UpdateServiceClassificationCheckConnectorTest {
                 "            </datafield>\n" +
                 "        </record>";
 
-        RecordData recordData = new RecordData();
-        Document document = byteArrayToDocument(recordString.getBytes());
-        recordData.getContent().add(document.getDocumentElement());
-        bibliographicRecord.setRecordData(recordData);
+        List<Object> content = Arrays.asList(byteArrayToDocument(record.getBytes()));
 
-        UpdateRecordResult actual = connector.classificationCheck(bibliographicRecord);
-        UpdateRecordResult expected = new UpdateRecordResult();
-        expected.setUpdateStatus(UpdateStatusEnum.FAILED);
+        RecordDataDTO recordDataDTO = new RecordDataDTO();
+        recordDataDTO.setContent(content);
+        bibliographicRecordDTO.setRecordDataDTO(recordDataDTO);
 
-        List<MessageEntry> messageEntries = new ArrayList<>();
+        UpdateRecordResponseDTO actual = connector.classificationCheck(bibliographicRecordDTO);
+        UpdateRecordResponseDTO expected = new UpdateRecordResponseDTO();
+        expected.setUpdateStatusEnumDTO(UpdateStatusEnumDTO.FAILED);
 
-        MessageEntry holdingsEntry = new MessageEntry();
-        holdingsEntry.setType(Type.WARNING);
+        List<MessageEntryDTO> messageEntries = new ArrayList<>();
+
+        MessageEntryDTO holdingsEntry = new MessageEntryDTO();
+        holdingsEntry.setType(TypeEnumDTO.WARNING);
         holdingsEntry.setMessage("Count: 8");
         messageEntries.add(holdingsEntry);
 
-        MessageEntry classificationEntry = new MessageEntry();
-        classificationEntry.setType(Type.WARNING);
+        MessageEntryDTO classificationEntry = new MessageEntryDTO();
+        classificationEntry.setType(TypeEnumDTO.WARNING);
         classificationEntry.setMessage("Reason: 245a er ændret");
         messageEntries.add(classificationEntry);
 
-        Messages messages = new Messages();
-        messages.getMessageEntry().addAll(messageEntries);
-
-        expected.setMessages(messages);
-
+        expected.addMessageEntryDtos(messageEntries);
         assertThat("Classification check returns OK if there is no classification change", actual, is(expected));
     }
 
