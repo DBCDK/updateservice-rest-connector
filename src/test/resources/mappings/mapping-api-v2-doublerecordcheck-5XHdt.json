@@ -1,0 +1,23 @@
+{
+  "id" : "4c1403b6-2b40-3632-b382-75b1ab05da60",
+  "request" : {
+    "url" : "/api/v2/doublerecordcheck",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{  \"recordSchema\": \"info:lc/xmlns/marcxchange-v1</recordSchema\",  \"recordPacking\": \"xml\",  \"recordDataDTO\": {    \"content\": [      \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-16\\\"?>\\n<record xmlns=\\\"info:lc/xmlns/marcxchange-v1\\\">            <datafield ind1=\\\"0\\\" ind2=\\\"0\\\" tag=\\\"001\\\">                <subfield code=\\\"a\\\">52958858</subfield>                <subfield code=\\\"b\\\">870970</subfield>                <subfield code=\\\"c\\\">20170616143600</subfield>                <subfield code=\\\"d\\\">20180628</subfield>                <subfield code=\\\"f\\\">a</subfield>            </datafield>        </record>\"    ]  },  \"extraRecordDataDTO\": null}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-api-v2-doublerecordcheck-5XHdt.json",
+    "headers" : {
+      "Server" : "Payara Server  5.194 #badassfish",
+      "X-Powered-By" : "Servlet/4.0 JSP/2.3 (Payara Server  5.194 #badassfish Java/Azul Systems, Inc./1.8)",
+      "Content-Type" : "application/json",
+      "X-Frame-Options" : "SAMEORIGIN"
+    }
+  },
+  "uuid" : "4c1403b6-2b40-3632-b382-75b1ab05da60"
+}

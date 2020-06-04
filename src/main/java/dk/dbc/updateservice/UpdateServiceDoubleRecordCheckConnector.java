@@ -5,41 +5,36 @@
 
 package dk.dbc.updateservice;
 
+import dk.dbc.dataio.commons.utils.lang.StringUtil;
 import dk.dbc.httpclient.FailSafeHttpClient;
 import dk.dbc.httpclient.HttpPost;
 import dk.dbc.httpclient.PathBuilder;
 import dk.dbc.invariant.InvariantUtil;
-import dk.dbc.oss.ns.catalogingupdate.BibliographicRecord;
-import dk.dbc.oss.ns.catalogingupdate.ObjectFactory;
-import dk.dbc.oss.ns.catalogingupdate.UpdateRecordResult;
+import dk.dbc.jsonb.JSONBContext;
+import dk.dbc.jsonb.JSONBException;
+import dk.dbc.updateservice.dto.BibliographicRecordDTO;
+import dk.dbc.updateservice.dto.UpdateRecordResponseDTO;
 import dk.dbc.util.Stopwatch;
 import net.jodah.failsafe.RetryPolicy;
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXB;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 
 public class UpdateServiceDoubleRecordCheckConnector {
+    private JSONBContext jsonbContext = new JSONBContext();
     public enum TimingLogLevel {
         TRACE, DEBUG, INFO, WARN, ERROR
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateServiceDoubleRecordCheckConnector.class);
-    private static final String PATH_DOUBLE_RECORD_CHECK = "/api/v1/doublerecordcheck";
+    private static final String PATH_DOUBLE_RECORD_CHECK = "/api/v2/doublerecordcheck";
 
     private static final RetryPolicy RETRY_POLICY = new RetryPolicy()
             .retryOn(Collections.singletonList(ProcessingException.class))
@@ -116,25 +111,25 @@ public class UpdateServiceDoubleRecordCheckConnector {
         }
     }
 
-    public UpdateRecordResult doubleRecordCheck(BibliographicRecord bibliographicRecord) throws UpdateServiceDoubleRecordCheckConnectorException {
+    public UpdateRecordResponseDTO doubleRecordCheck(BibliographicRecordDTO bibliographicRecordDTO) throws UpdateServiceDoubleRecordCheckConnectorException, JSONBException {
         final Stopwatch stopwatch = new Stopwatch();
         try {
-            final InputStream inputStream = sendPostRequest(PATH_DOUBLE_RECORD_CHECK, bibliographicRecord, InputStream.class);
-            return JAXB.unmarshal(inputStream, UpdateRecordResult.class);
+            final InputStream inputStream = sendPostRequest(PATH_DOUBLE_RECORD_CHECK, bibliographicRecordDTO, InputStream.class);
+            return jsonbContext.unmarshall(StringUtil.asString(inputStream), UpdateRecordResponseDTO.class);
         } finally {
             logger.log("doubleRecordCheck took {} milliseconds",
                     stopwatch.getElapsedTime(TimeUnit.MILLISECONDS));
         }
     }
 
-    private <T> T sendPostRequest(String basePath, BibliographicRecord bibliographicRecord, Class<T> type)
-            throws UpdateServiceDoubleRecordCheckConnectorException {
-        InvariantUtil.checkNotNullOrThrow(bibliographicRecord, "bibliographicRecord");
+    private <T> T sendPostRequest(String basePath, BibliographicRecordDTO bibliographicRecordDTO, Class<T> type)
+            throws UpdateServiceDoubleRecordCheckConnectorException, JSONBException {
+        InvariantUtil.checkNotNullOrThrow(bibliographicRecordDTO, "bibliographicRecord");
         final PathBuilder path = new PathBuilder(basePath);
         final HttpPost post = new HttpPost(failSafeHttpClient)
                 .withBaseUrl(baseUrl)
-                .withData(marshal(bibliographicRecord), "application/xml")
-                .withHeader("Accept", "application/xml")
+                .withData(jsonbContext.marshall(bibliographicRecordDTO), "application/json")
+                .withHeader("Accept", "application/json")
                 .withPathElements(path.build());
 
         final Response response = post.execute();
@@ -162,21 +157,6 @@ public class UpdateServiceDoubleRecordCheckConnector {
                     String.format("Double record check returned with unexpected status code: %s",
                             actualStatus),
                     actualStatus.getStatusCode());
-        }
-    }
-
-    String marshal(BibliographicRecord bibliographicRecord) {
-        try {
-            final ObjectFactory objectFactory = new ObjectFactory();
-            final JAXBElement<BibliographicRecord> jAXBElement = objectFactory.createBibliographicRecord(bibliographicRecord);
-            final StringWriter stringWriter = new StringWriter();
-            final JAXBContext jaxbContext = JAXBContext.newInstance(BibliographicRecord.class);
-            final Marshaller marshaller = jaxbContext.createMarshaller();
-            marshaller.marshal(jAXBElement, stringWriter);
-            return stringWriter.toString();
-        } catch (JAXBException e) {
-            LOGGER.warn("Got an error while marshalling input bibliographicRecord, using reflection instead.", e);
-            return new ReflectionToStringBuilder(bibliographicRecord, new RecursiveToStringStyle()).toString();
         }
     }
 

@@ -7,12 +7,21 @@ package dk.dbc.updateservice;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import dk.dbc.httpclient.HttpClient;
+import dk.dbc.jsonb.JSONBContext;
 import dk.dbc.oss.ns.catalogingupdate.BibliographicRecord;
 import dk.dbc.oss.ns.catalogingupdate.DoubleRecordEntries;
 import dk.dbc.oss.ns.catalogingupdate.DoubleRecordEntry;
 import dk.dbc.oss.ns.catalogingupdate.RecordData;
 import dk.dbc.oss.ns.catalogingupdate.UpdateRecordResult;
 import dk.dbc.oss.ns.catalogingupdate.UpdateStatusEnum;
+import dk.dbc.updateservice.dto.BibliographicRecordDTO;
+import dk.dbc.updateservice.dto.DoubleRecordFrontendDTO;
+import dk.dbc.updateservice.dto.RecordDataDTO;
+import dk.dbc.updateservice.dto.UpdateRecordResponseDTO;
+import dk.dbc.updateservice.dto.UpdateStatusEnumDTO;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.junit.jupiter.api.AfterAll;
@@ -80,9 +89,9 @@ public class UpdateServiceDoubleRecordCheckConnectorTest {
 
     @Test
     void checkDoubleRecordTest_Ok() throws Exception {
-        BibliographicRecord bibliographicRecord = new BibliographicRecord();
-        bibliographicRecord.setRecordSchema("info:lc/xmlns/marcxchange-v1</recordSchema");
-        bibliographicRecord.setRecordPacking("xml");
+        BibliographicRecordDTO bibliographicRecordDTO = new BibliographicRecordDTO();
+        bibliographicRecordDTO.setRecordSchema("info:lc/xmlns/marcxchange-v1</recordSchema");
+        bibliographicRecordDTO.setRecordPacking("xml");
 
         String recordString = "        <record xmlns=\"info:lc/xmlns/marcxchange-v1\">" +
                 "            <datafield ind1=\"0\" ind2=\"0\" tag=\"001\">" +
@@ -94,23 +103,24 @@ public class UpdateServiceDoubleRecordCheckConnectorTest {
                 "            </datafield>" +
                 "        </record>";
 
-        RecordData recordData = new RecordData();
-        Document document = byteArrayToDocument(recordString.getBytes());
-        recordData.getContent().add(document.getDocumentElement());
-        bibliographicRecord.setRecordData(recordData);
+        List<Object> content = Arrays.asList(byteArrayToDocument(recordString.getBytes()));
 
-        UpdateRecordResult actual = connector.doubleRecordCheck(bibliographicRecord);
-        UpdateRecordResult expected = new UpdateRecordResult();
-        expected.setUpdateStatus(UpdateStatusEnum.OK);
+        RecordDataDTO recordDataDTO = new RecordDataDTO();
+        recordDataDTO.setContent(content);
+        bibliographicRecordDTO.setRecordDataDTO(recordDataDTO);
+
+        UpdateRecordResponseDTO actual = connector.doubleRecordCheck(bibliographicRecordDTO);
+        UpdateRecordResponseDTO expected = new UpdateRecordResponseDTO();
+        expected.setUpdateStatusEnumDTO(UpdateStatusEnumDTO.OK);
 
         assertThat("Double record check returns OK if there is no match", actual, is(expected));
     }
 
     @Test
     void checkDoubleRecordTest_DoubleRecord() throws Exception {
-        BibliographicRecord bibliographicRecord = new BibliographicRecord();
-        bibliographicRecord.setRecordSchema("info:lc/xmlns/marcxchange-v1</recordSchema");
-        bibliographicRecord.setRecordPacking("xml");
+        BibliographicRecordDTO bibliographicRecordDTO = new BibliographicRecordDTO();
+        bibliographicRecordDTO.setRecordSchema("info:lc/xmlns/marcxchange-v1</recordSchema");
+        bibliographicRecordDTO.setRecordPacking("xml");
 
         String recordString = "        <record xmlns=\"info:lc/xmlns/marcxchange-v1\">" +
                 "            <datafield ind1=\"0\" ind2=\"0\" tag=\"001\">" +
@@ -125,24 +135,27 @@ public class UpdateServiceDoubleRecordCheckConnectorTest {
                 "            </datafield>" +
                 "        </record>";
 
-        RecordData recordData = new RecordData();
-        Document document = byteArrayToDocument(recordString.getBytes());
-        recordData.getContent().add(document.getDocumentElement());
-        bibliographicRecord.setRecordData(recordData);
+        List<Object> content = Arrays.asList(byteArrayToDocument(recordString.getBytes()));
+        RecordDataDTO recordDataDTO = new RecordDataDTO();
+        recordDataDTO.setContent(content);
+        bibliographicRecordDTO.setRecordDataDTO(recordDataDTO);
 
-        UpdateRecordResult actual = connector.doubleRecordCheck(bibliographicRecord);
-        UpdateRecordResult expected = new UpdateRecordResult();
-        expected.setUpdateStatus(UpdateStatusEnum.FAILED);
-        expected.setDoubleRecordKey("d8b4ad5f-be30-4c1f-8059-aa757950a337");
+        System.out.println("Request is:"+ new JSONBContext().marshall(bibliographicRecordDTO));
 
-        DoubleRecordEntry doubleRecordEntry = new DoubleRecordEntry();
-        doubleRecordEntry.setMessage("Double record for record 52958858, reason: 021e");
-        doubleRecordEntry.setPid("52958857:870970");
+        UpdateRecordResponseDTO actual = connector.doubleRecordCheck(bibliographicRecordDTO);
+        UpdateRecordResponseDTO expected = new UpdateRecordResponseDTO();
+        expected.setUpdateStatusEnumDTO(UpdateStatusEnumDTO.FAILED);
+        expected.setDoubleRecordKey("52743f23-0522-40d7-b762-557fc717160b");
 
-        DoubleRecordEntries doubleRecordEntries = new DoubleRecordEntries();
-        doubleRecordEntries.getDoubleRecordEntry().add(doubleRecordEntry);
+        DoubleRecordFrontendDTO doubleRecordFrontendDTO = new DoubleRecordFrontendDTO();
+        doubleRecordFrontendDTO.setMessage("Double record for record 52958858, reason: 021e");
+        doubleRecordFrontendDTO.setPid("52958857:870970");
 
-        expected.setDoubleRecordEntries(doubleRecordEntries);
+        List<DoubleRecordFrontendDTO> doubleRecordEntries = new ArrayList<>();
+
+        doubleRecordEntries.add(doubleRecordFrontendDTO);
+
+        expected.addDoubleRecordFrontendDtos(doubleRecordEntries);
 
         assertThat("Double record check returns failed when double record is detected", actual, is(expected));
     }
