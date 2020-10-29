@@ -1,0 +1,23 @@
+{
+  "id" : "703cea0b-2a96-3d82-8f72-907ded13c35c",
+  "request" : {
+    "url" : "/api/v2/doublerecordcheck",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{\"recordSchema\":\"info:lc/xmlns/marcxchange-v1</recordSchema\",\"recordPacking\":\"xml\",\"recordDataDTO\":{\"content\":[\"<?xml version='1.0' encoding='UTF-8'?>\\n<record xmlns='info:lc/xmlns/marcxchange-v1' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='info:lc/xmlns/marcxchange-v1 http://www.loc.gov/standards/iso25577/marcxchange-1-1.xsd'><leader>00000nas a2200000 i 4500</leader><datafield ind1='0' ind2=' ' tag='022'><subfield code='a'>2597-0378</subfield></datafield><datafield ind1='0' ind2='4' tag='082'><subfield code='a'>700</subfield><subfield code='2'>21</subfield></datafield><datafield ind1='1' ind2='0' tag='245'><subfield code='a'>Professor Wilfred Christensen :</subfield><subfield code='b'>tidsskrift : star wars og star trek.</subfield></datafield><datafield ind1='3' ind2=' ' tag='260'><subfield code='a'>København :</subfield><subfield code='b'>The Package,</subfield><subfield code='c'>2019-</subfield></datafield><datafield ind1='0' ind2=' ' tag='362'><subfield code='a'>Årgang 2019, oktober-</subfield></datafield><datafield ind1=' ' ind2=' ' tag='912'><subfield code='m'>70.6</subfield></datafield><datafield ind1=' ' ind2=' ' tag='932'><subfield code='a'>DPF</subfield><subfield code='b'>202018</subfield><subfield code='c'>NY</subfield></datafield><datafield ind1=' ' ind2=' ' tag='035'><subfield code='a'>(DK-800010)12345678969005763</subfield></datafield><datafield ind1=' ' ind2=' ' tag='310'><subfield code='a'>2 gange om året</subfield></datafield></record>\"]},\"extraRecordDataDTO\":null}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-api-v2-doublerecordcheck-lXPY6.json",
+    "headers" : {
+      "Server" : "Payara Server Enterprise  5.21.2 #badassfish",
+      "X-Powered-By" : "Servlet/4.0 JSP/2.3 (Payara Server Enterprise  5.21.2 #badassfish Java/Azul Systems, Inc./11)",
+      "Content-Type" : "application/json",
+      "X-Frame-Options" : "SAMEORIGIN"
+    }
+  },
+  "uuid" : "703cea0b-2a96-3d82-8f72-907ded13c35c"
+}

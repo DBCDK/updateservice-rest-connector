@@ -8,14 +8,15 @@ package dk.dbc.updateservice;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import dk.dbc.httpclient.HttpClient;
 import dk.dbc.jsonb.JSONBContext;
+import dk.dbc.marc.binding.MarcRecord;
+import dk.dbc.marc.reader.MarcReaderException;
+import dk.dbc.marc.reader.MarcXchangeV1Reader;
+import dk.dbc.marc.writer.MarcXchangeV1Writer;
 import dk.dbc.updateservice.dto.BibliographicRecordDTO;
 import dk.dbc.updateservice.dto.DoubleRecordFrontendDTO;
 import dk.dbc.updateservice.dto.RecordDataDTO;
 import dk.dbc.updateservice.dto.UpdateRecordResponseDTO;
 import dk.dbc.updateservice.dto.UpdateStatusEnumDTO;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.junit.jupiter.api.AfterAll;
@@ -30,6 +31,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -134,7 +140,7 @@ public class UpdateServiceDoubleRecordCheckConnectorTest {
         recordDataDTO.setContent(content);
         bibliographicRecordDTO.setRecordDataDTO(recordDataDTO);
 
-        System.out.println("Request is:"+ new JSONBContext().marshall(bibliographicRecordDTO));
+        System.out.println("Request is:" + new JSONBContext().marshall(bibliographicRecordDTO));
 
         UpdateRecordResponseDTO actual = connector.doubleRecordCheck(bibliographicRecordDTO);
         UpdateRecordResponseDTO expected = new UpdateRecordResponseDTO();
@@ -154,10 +160,81 @@ public class UpdateServiceDoubleRecordCheckConnectorTest {
         assertThat("Double record check returns failed when double record is detected", actual, is(expected));
     }
 
+    @Test
+    void checkDoubleRecordTest_DoubleRecord_DPF() throws Exception {
+        String recordString = "    <record xmlns=\"info:lc/xmlns/marcxchange-v1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"info:lc/xmlns/marcxchange-v1 http://www.loc.gov/standards/iso25577/marcxchange-1-1.xsd\">\n" +
+                "        <leader>00000nas a2200000 i 4500</leader>\n" +
+                "        <datafield ind1=\"0\" ind2=\" \" tag=\"022\">\n" +
+                "            <subfield code=\"a\">2597-0378</subfield>\n" +
+                "        </datafield>\n" +
+                "        <datafield ind1=\"0\" ind2=\"4\" tag=\"082\">\n" +
+                "            <subfield code=\"a\">700</subfield>\n" +
+                "            <subfield code=\"2\">21</subfield>\n" +
+                "        </datafield>\n" +
+                "        <datafield ind1=\"1\" ind2=\"0\" tag=\"245\">\n" +
+                "            <subfield code=\"a\">Professor Wilfred Christensen :</subfield>\n" +
+                "            <subfield code=\"b\">tidsskrift : star wars og star trek.</subfield>\n" +
+                "        </datafield>\n" +
+                "        <datafield ind1=\"3\" ind2=\" \" tag=\"260\">\n" +
+                "            <subfield code=\"a\">København :</subfield>\n" +
+                "            <subfield code=\"b\">The Package,</subfield>\n" +
+                "            <subfield code=\"c\">2019-</subfield>\n" +
+                "        </datafield>\n" +
+                "        <datafield ind1=\"0\" ind2=\" \" tag=\"362\">\n" +
+                "            <subfield code=\"a\">Årgang 2019, oktober-</subfield>\n" +
+                "        </datafield>\n" +
+                "        <datafield ind1=\" \" ind2=\" \" tag=\"912\">\n" +
+                "            <subfield code=\"m\">70.6</subfield>\n" +
+                "        </datafield>\n" +
+                "        <datafield ind1=\" \" ind2=\" \" tag=\"932\">\n" +
+                "            <subfield code=\"a\">DPF</subfield>\n" +
+                "            <subfield code=\"b\">202018</subfield>\n" +
+                "            <subfield code=\"c\">NY</subfield>\n" +
+                "        </datafield>\n" +
+                "        <datafield ind1=\" \" ind2=\" \" tag=\"035\">\n" +
+                "            <subfield code=\"a\">(DK-800010)12345678969005763</subfield>\n" +
+                "        </datafield>\n" +
+                "        <datafield ind1=\" \" ind2=\" \" tag=\"310\">\n" +
+                "            <subfield code=\"a\">2 gange om året</subfield>\n" +
+                "        </datafield>\n" +
+                "    </record>";
+
+
+        MarcRecord marcRecord = fromMarcXchange(recordString.getBytes());
+
+        final byte[] content = toMarcXchange(marcRecord);
+        final RecordDataDTO recordDataDTO = new RecordDataDTO();
+        recordDataDTO.setContent(Collections.singletonList(new String(content)));
+
+        final BibliographicRecordDTO bibliographicRecordDTO = new BibliographicRecordDTO();
+        bibliographicRecordDTO.setRecordSchema("info:lc/xmlns/marcxchange-v1</recordSchema");
+        bibliographicRecordDTO.setRecordPacking("xml");
+        bibliographicRecordDTO.setRecordDataDTO(recordDataDTO);
+
+        System.out.println("Request is:" + new JSONBContext().marshall(bibliographicRecordDTO));
+
+        UpdateRecordResponseDTO actual = connector.doubleRecordCheck(bibliographicRecordDTO);
+        UpdateRecordResponseDTO expected = new UpdateRecordResponseDTO();
+        expected.setUpdateStatusEnumDTO(UpdateStatusEnumDTO.OK);
+
+        assertThat("Double record check returns OK if there is no match", actual, is(expected));
+    }
+
     private Document byteArrayToDocument(byte[] byteArray) throws IOException, SAXException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
         documentBuilder.reset();
         return documentBuilder.parse(byteArrayInputStream);
+    }
+
+    public static MarcRecord fromMarcXchange(byte[] bytes) throws MarcReaderException {
+        final MarcXchangeV1Reader reader = new MarcXchangeV1Reader(
+                new ByteArrayInputStream(bytes), StandardCharsets.UTF_8);
+        return reader.read();
+    }
+
+    public static byte[] toMarcXchange(MarcRecord marcRecord) {
+        final MarcXchangeV1Writer writer = new MarcXchangeV1Writer();
+        return writer.write(marcRecord, StandardCharsets.UTF_8);
     }
 
 }

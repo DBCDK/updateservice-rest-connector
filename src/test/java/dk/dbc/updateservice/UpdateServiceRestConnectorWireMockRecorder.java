@@ -42,6 +42,7 @@ public class UpdateServiceRestConnectorWireMockRecorder {
             throws Exception {
         connectorTest.checkDoubleRecordTest_Ok();
         connectorTest.checkDoubleRecordTest_DoubleRecord();
+        connectorTest.checkDoubleRecordTest_DoubleRecord_DPF();
     }
 
     private static void classificationCheckRequests(UpdateServiceClassificationCheckConnectorTest connectorTest) throws Exception {
