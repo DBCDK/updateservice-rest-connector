@@ -226,13 +226,13 @@ public class UpdateServiceDoubleRecordCheckConnectorTest {
         return documentBuilder.parse(byteArrayInputStream);
     }
 
-    public static MarcRecord fromMarcXchange(byte[] bytes) throws MarcReaderException {
+    private static MarcRecord fromMarcXchange(byte[] bytes) throws MarcReaderException {
         final MarcXchangeV1Reader reader = new MarcXchangeV1Reader(
                 new ByteArrayInputStream(bytes), StandardCharsets.UTF_8);
         return reader.read();
     }
 
-    public static byte[] toMarcXchange(MarcRecord marcRecord) {
+    private static byte[] toMarcXchange(MarcRecord marcRecord) {
         final MarcXchangeV1Writer writer = new MarcXchangeV1Writer();
         return writer.write(marcRecord, StandardCharsets.UTF_8);
     }
