@@ -19,7 +19,7 @@ import dk.dbc.util.Stopwatch;
 import dk.dbc.dataio.commons.utils.lang.StringUtil;
 
 import java.io.InputStream;
-import java.util.Collections;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
@@ -40,10 +40,10 @@ public class UpdateServiceUpdateConnector {
     private static final String PATH_UPDATESERVICE = "/api/v1/updateservice";
     private static final String PATH_GETSCHEMAS = "/api/v1/updateservice/getschemas";
 
-    private static final RetryPolicy RETRY_POLICY = new RetryPolicy()
-            .retryOn(Collections.singletonList(ProcessingException.class))
-            .retryIf((Response response) -> response.getStatus() == 404)
-            .withDelay(10, TimeUnit.SECONDS)
+    private static final RetryPolicy<Response> RETRY_POLICY = new RetryPolicy<Response>()
+            .handle(ProcessingException.class)
+            .handleResultIf(response -> response.getStatus() == 404)
+            .withDelay(Duration.ofSeconds(10))
             .withMaxRetries(1);
 
     private final FailSafeHttpClient failSafeHttpClient;
