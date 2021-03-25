@@ -6,7 +6,7 @@ In pom.xml add this dependency:
 
     <groupId>dk.dbc</groupId>
     <artifactId>updateservice-rest-connector</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.1-SNAPSHOT</version>
 
 In your EJB add the following inject:
 
