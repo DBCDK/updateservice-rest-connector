@@ -1,11 +1,13 @@
 #!groovy
 
-def workerNode = "devel10"
+def workerNode = "devel11"
 
 pipeline {
 	agent {label workerNode}
 	triggers {
 		pollSCM("H/03 * * * *")
+		upstream(upstreamProjects: "Docker-payara6-bump-trigger",
+				threshold: hudson.model.Result.SUCCESS)
 	}
 	options {
 		timestamps()
