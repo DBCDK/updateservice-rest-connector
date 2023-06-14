@@ -1,13 +1,8 @@
-/*
- * Copyright Dansk Bibliotekscenter a/s. Licensed under GPLv3
- * See license text in LICENSE.txt or at https://opensource.dbc.dk/licenses/gpl-3.0/
- */
-
 package dk.dbc.updateservice;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.httpclient.HttpClient;
-import dk.dbc.jsonb.JSONBContext;
 import dk.dbc.marc.binding.MarcRecord;
 import dk.dbc.marc.reader.MarcReaderException;
 import dk.dbc.marc.reader.MarcXchangeV1Reader;
@@ -17,6 +12,7 @@ import dk.dbc.updateservice.dto.DoubleRecordFrontendDTO;
 import dk.dbc.updateservice.dto.RecordDataDTO;
 import dk.dbc.updateservice.dto.UpdateRecordResponseDTO;
 import dk.dbc.updateservice.dto.UpdateStatusEnumDTO;
+import jakarta.ws.rs.client.Client;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.junit.jupiter.api.AfterAll;
@@ -25,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.client.Client;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,7 +28,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,7 +36,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class UpdateServiceDoubleRecordCheckConnectorTest {
+class UpdateServiceDoubleRecordCheckConnectorTest {
 
     private static WireMockServer wireMockServer;
     private static String wireMockHost;
@@ -103,7 +97,7 @@ public class UpdateServiceDoubleRecordCheckConnectorTest {
                 "            </datafield>" +
                 "        </record>";
 
-        List<Object> content = Arrays.asList(byteArrayToDocument(recordString.getBytes()));
+        List<Object> content = Collections.singletonList(byteArrayToDocument(recordString.getBytes()));
 
         RecordDataDTO recordDataDTO = new RecordDataDTO();
         recordDataDTO.setContent(content);
@@ -135,7 +129,7 @@ public class UpdateServiceDoubleRecordCheckConnectorTest {
                 "            </datafield>" +
                 "        </record>";
 
-        List<Object> content = Arrays.asList(byteArrayToDocument(recordString.getBytes()));
+        List<Object> content = Collections.singletonList(byteArrayToDocument(recordString.getBytes()));
         RecordDataDTO recordDataDTO = new RecordDataDTO();
         recordDataDTO.setContent(content);
         bibliographicRecordDTO.setRecordDataDTO(recordDataDTO);

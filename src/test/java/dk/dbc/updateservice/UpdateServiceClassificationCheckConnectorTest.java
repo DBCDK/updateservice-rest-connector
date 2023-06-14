@@ -8,7 +8,7 @@ import dk.dbc.updateservice.dto.RecordDataDTO;
 import dk.dbc.updateservice.dto.TypeEnumDTO;
 import dk.dbc.updateservice.dto.UpdateRecordResponseDTO;
 import dk.dbc.updateservice.dto.UpdateStatusEnumDTO;
-import java.util.Arrays;
+import jakarta.ws.rs.client.Client;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.junit.jupiter.api.AfterAll;
@@ -17,13 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.client.Client;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
@@ -31,7 +31,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class UpdateServiceClassificationCheckConnectorTest {
+class UpdateServiceClassificationCheckConnectorTest {
     private static WireMockServer wireMockServer;
     private static String wireMockHost;
 
@@ -58,11 +58,6 @@ public class UpdateServiceClassificationCheckConnectorTest {
         wireMockServer.start();
         wireMockHost = "http://localhost:" + wireMockServer.port();
         configureFor("localhost", wireMockServer.port());
-    }
-
-    @BeforeAll
-    static void setDocumentBuilder() {
-
     }
 
     @BeforeAll
@@ -226,7 +221,7 @@ public class UpdateServiceClassificationCheckConnectorTest {
                 "            </datafield>\n" +
                 "        </record>";
 
-        List<Object> content = Arrays.asList(byteArrayToDocument(record.getBytes()));
+        List<Object> content = Collections.singletonList(byteArrayToDocument(record.getBytes()));
 
         RecordDataDTO recordDataDTO = new RecordDataDTO();
         recordDataDTO.setContent(content);
@@ -389,7 +384,7 @@ public class UpdateServiceClassificationCheckConnectorTest {
                 "            </datafield>\n" +
                 "        </record>";
 
-        List<Object> content = Arrays.asList(byteArrayToDocument(record.getBytes()));
+        List<Object> content = Collections.singletonList(byteArrayToDocument(record.getBytes()));
 
         RecordDataDTO recordDataDTO = new RecordDataDTO();
         recordDataDTO.setContent(content);
