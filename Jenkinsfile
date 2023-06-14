@@ -2,16 +2,36 @@
 
 def workerNode = "devel11"
 
+void notifyOfBuildStatus(final String buildStatus) {
+	final String subject = "${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+	final String details = """<p> Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+    <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>"""
+	emailext(
+			subject: "$subject",
+			body: "$details", attachLog: true, compressLog: false,
+			mimeType: "text/html",
+			recipientProviders: [[$class: "CulpritsRecipientProvider"]]
+	)
+}
+
 pipeline {
-	agent {label workerNode}
+	agent { label workerNode }
+
+	tools {
+		jdk 'jdk11'
+		maven 'Maven 3'
+	}
+
 	triggers {
 		pollSCM("H/03 * * * *")
 		upstream(upstreamProjects: "Docker-payara6-bump-trigger",
 				threshold: hudson.model.Result.SUCCESS)
 	}
+
 	options {
 		timestamps()
 	}
+
 	stages {
 		stage("clear workspace") {
 			steps {
@@ -19,34 +39,28 @@ pipeline {
 				checkout scm
 			}
 		}
-		stage("verify") {
+
+		stage("Maven build") {
 			steps {
-				withMaven(maven: 'Maven 3') {
-					sh "mvn verify pmd:pmd findbugs:findbugs"
-					junit "**/target/surefire-reports/TEST-*.xml"
+				sh "mvn verify pmd:pmd pmd:cpd spotbugs:spotbugs"
+
+				junit testResults: '**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml'
+
+				script {
+					def java = scanForIssues tool: [$class: 'Java']
+					publishIssues issues: [java], unstableTotalAll:1
+
+					def pmd = scanForIssues tool: [$class: 'Pmd']
+					publishIssues issues: [pmd], unstableTotalAll:1
+
+					// spotbugs still has some outstanding issues with regard
+					// to analyzing Java 11 bytecode.
+					// def spotbugs = scanForIssues tool: [$class: 'SpotBugs']
+					// publishIssues issues:[spotbugs], unstableTotalAll:1
 				}
 			}
 		}
-		stage("warnings") {
-			agent {label workerNode}
-			steps {
-				warnings consoleParsers: [
-					[parserName: "Java Compiler (javac)"],
-					[parserName: "JavaDoc Tool"]
-				],
-					unstableTotalAll: "0",
-					failedTotalAll: "0"
-			}
-		}
-		stage("pmd") {
-			agent {label workerNode}
-			steps {
-				step([$class: 'hudson.plugins.pmd.PmdPublisher',
-					  pattern: 'target/pmd.xml',
-					  unstableTotalAll: "0",
-					  failedTotalAll: "0"])
-			}
-		}
+
 		stage("deploy") {
 			when {
 				branch "master"
@@ -56,6 +70,15 @@ pipeline {
 					sh "mvn jar:jar deploy:deploy"
 				}
 			}
+		}
+	}
+
+	post {
+		unstable {
+			notifyOfBuildStatus("build became unstable")
+		}
+		failure {
+			notifyOfBuildStatus("build failed")
 		}
 	}
 }
