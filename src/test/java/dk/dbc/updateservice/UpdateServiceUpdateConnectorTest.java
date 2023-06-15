@@ -1,8 +1,8 @@
 package dk.dbc.updateservice;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.httpclient.HttpClient;
-import dk.dbc.jsonb.JSONBException;
 import dk.dbc.updateservice.dto.AuthenticationDTO;
 import dk.dbc.updateservice.dto.BibliographicRecordDTO;
 import dk.dbc.updateservice.dto.MessageEntryDTO;
@@ -16,7 +16,7 @@ import dk.dbc.updateservice.dto.UpdateServiceRequestDTO;
 import dk.dbc.updateservice.dto.UpdateStatusEnumDTO;
 import java.util.Arrays;
 import java.util.List;
-import javax.ws.rs.client.Client;
+import jakarta.ws.rs.client.Client;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.junit.jupiter.api.AfterAll;
@@ -28,7 +28,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.hamcrest.core.Is.is;
 
-public class UpdateServiceUpdateConnectorTest {
+class UpdateServiceUpdateConnectorTest {
     private static WireMockServer wireMockServer;
     private static String wireMockHost;
     static UpdateServiceUpdateConnector connector;
@@ -74,7 +74,7 @@ public class UpdateServiceUpdateConnectorTest {
         final MessageEntryDTO messageEntryDTO = new MessageEntryDTO();
         messageEntryDTO.setMessage("Authentication error");
         messageEntryDTO.setType(TypeEnumDTO.FATAL);
-        expectedResponse.addMessageEntryDtos(Arrays.asList(messageEntryDTO));
+        expectedResponse.addMessageEntryDtos(List.of(messageEntryDTO));
 
         final UpdateRecordResponseDTO actualRespons = connector.updateRecord(updateServiceRequestDTO, "42.42.42.42");
 
@@ -85,7 +85,7 @@ public class UpdateServiceUpdateConnectorTest {
     void checkThatGetSchemasWorksWithDTOS() throws JSONBException, UpdateServiceUpdateConnectorException {
         final SchemasRequestDTO schemasRequestDTO = getExampleRequestForSchemas();
 
-        final SchemasResponseDTO expectedResponse = getExampleReponseForSchemas();
+        final SchemasResponseDTO expectedResponse = getExampleResponseForSchemas();
 
         SchemasResponseDTO actualResponse = connector.getSchemas(schemasRequestDTO);
 
@@ -102,7 +102,7 @@ public class UpdateServiceUpdateConnectorTest {
         MessageEntryDTO messageEntryDTO = new MessageEntryDTO();
         messageEntryDTO.setMessage("Webservice RESPONDS with content: Agency not found");
         messageEntryDTO.setType(TypeEnumDTO.FATAL);
-        expectedResponse.addMessageEntryDtos(Arrays.asList(messageEntryDTO));
+        expectedResponse.addMessageEntryDtos(List.of(messageEntryDTO));
 
         UpdateRecordResponseDTO actualRespons = connector.updateRecord(updateServiceRequestDTO);
 
@@ -126,7 +126,7 @@ public class UpdateServiceUpdateConnectorTest {
         bibliographicRecordDTO.setRecordPacking("xml");
 
         RecordDataDTO recordDataDTO = new RecordDataDTO();
-        List<Object> content = Arrays.asList("<record xmlns=\"info:lc/xmlns/marcxchange-v1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.loc.gov/standards/iso25577/marcxchange-1-1.xsd\">\n" +
+        List<Object> content = List.of("<record xmlns=\"info:lc/xmlns/marcxchange-v1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.loc.gov/standards/iso25577/marcxchange-1-1.xsd\">\n" +
                 "                            <leader>dbfhfgh2</leader>\n" +
                 "                            <datafield ind1=\"0\" ind2=\"0\" tag=\"001\">\n" +
                 "                                <subfield code=\"a\">68693268</subfield>\n" +
@@ -202,7 +202,7 @@ public class UpdateServiceUpdateConnectorTest {
         return schemasRequestDTO;
     }
 
-    private SchemasResponseDTO getExampleReponseForSchemas() {
+    private SchemasResponseDTO getExampleResponseForSchemas() {
         SchemasResponseDTO schemasResponseDTO = new SchemasResponseDTO();
         schemasResponseDTO.setUpdateStatusEnumDTO(UpdateStatusEnumDTO.OK);
         List<SchemaDTO> schemaDTOs = Arrays.asList(
